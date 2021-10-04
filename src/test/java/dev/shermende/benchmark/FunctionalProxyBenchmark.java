@@ -1,6 +1,6 @@
 package dev.shermende.benchmark;
 
-import dev.shermende.ClassicProxy;
+import dev.shermende.FunctionalProxy;
 import dev.shermende.model.IOrigin;
 import dev.shermende.model.IOriginImpl;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -9,14 +9,13 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Fork(1)
 @Threads(10)
@@ -24,21 +23,19 @@ import java.util.concurrent.TimeUnit;
 @Measurement(iterations = 3)
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.Throughput)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-public class AbstractFactoryTestBenchmark {
+public class FunctionalProxyBenchmark {
 
-    private IOrigin proxy;
+    private final IOrigin origin = new IOriginImpl();
+    private Function<String, String> proxy;
 
     @Setup(Level.Trial)
     public synchronized void benchmarkSetup() {
-        System.out.println("benchmarkSetup");
-        proxy = (IOrigin) ClassicProxy.build(new IOriginImpl());
+        proxy = FunctionalProxy.build(origin::action);
     }
 
     @Benchmark
     public void benchmark() {
-        System.out.println("benchmark");
-        proxy.action("itsme");
+        proxy.apply("itsme");
     }
 
 }
